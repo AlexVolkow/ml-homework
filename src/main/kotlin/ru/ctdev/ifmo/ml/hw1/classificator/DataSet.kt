@@ -4,7 +4,7 @@ import ru.ctdev.ifmo.ml.hw1.math.Matrix
 import ru.ctdev.ifmo.ml.hw1.math.Vector
 import ru.ctdev.ifmo.ml.hw1.math.asMatrix
 
-data class DataSet(val vectors: Matrix, private val classes: Matrix) : Iterable<Vector> by vectors {
+data class DataSet(val vectors: Matrix, val classes: Matrix) : Iterable<Vector> by vectors {
     val countClasses: Int
         get() = classes.distinct().size
 
@@ -18,6 +18,30 @@ data class DataSet(val vectors: Matrix, private val classes: Matrix) : Iterable<
 
     fun removeRow(row: Int): DataSet {
         return DataSet(vectors.removeRow(row), classes.removeRow(row))
+    }
+
+    fun filterByIndex(int: Int): Pair<DataSet, DataSet> {
+        val X_train = vectors.take(int)
+        val Y_train = classes.take(int)
+
+        val X_test = vectors.takeLast(vectors.size - int)
+        val Y_test = classes.take(vectors.size - int)
+        return DataSet(
+            Matrix(X_train.toMutableList()),
+            Matrix(Y_train.toMutableList())
+        ) to DataSet(Matrix(X_test.toMutableList()), Matrix(Y_test.toMutableList()))
+    }
+
+    fun shuffle(): DataSet {
+        val idxs = (0 until vectors.size).toList().shuffled()//.sortedBy { getClass(it) }
+
+        val X = mutableListOf<Vector>()
+        val Y = mutableListOf<Vector>()
+        for (i in idxs) {
+            X.add(vectors[i])
+            Y.add(classes[i])
+        }
+        return DataSet(Matrix(X), Matrix(Y))
     }
 
     fun singleDataSet(row: Int): DataSet {

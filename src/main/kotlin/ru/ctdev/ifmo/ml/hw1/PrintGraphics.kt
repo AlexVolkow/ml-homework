@@ -50,11 +50,11 @@ suspend fun getFixedWindowResults(dataset: DataSet, kernel: Kernel, distance: Di
     var width = minDistance
     while (width < maxDistance) {
         val window = FixedWindow(width)
-        val classificator = KnnClassificator(kernel, distance)
+        val classificator = KnnClassificator(kernel, distance, window)
         val analyzer = ClassificatorAnalyzer(classificator)
         val separator = LeaveOneOutDataSetSeparator(dataset)
 
-        val fscore = analyzer.getScore(dataset.countClasses, separator, window)
+        val fscore = analyzer.getScore(dataset.countClasses, separator)
         resultProvider.save(TrainResult("k", "d", "w", width, fscore))
         println(width to fscore)
         results.add(width to fscore)
@@ -76,12 +76,12 @@ suspend fun getVariableWindowResults(dataset: DataSet, kernel: Kernel, distance:
     val results = mutableListOf<Pair<Double, Double>>()
     for (h in 1 until (dataset.vectors.height / 5) step (10)){
         val window = VariableWindow(h)
-        val classificator = KnnClassificator(kernel, distance)
+        val classificator = KnnClassificator(kernel, distance, window)
         val analyzer = ClassificatorAnalyzer(classificator)
         val separator = LeaveOneOutDataSetSeparator(dataset)
 
         val width = h.toDouble()
-        val fscore = analyzer.getScore(dataset.countClasses, separator, window)
+        val fscore = analyzer.getScore(dataset.countClasses, separator)
         resultProvider.save(TrainResult("k", "d", "w", width, fscore))
         println(width to fscore)
         results.add(width to fscore)
@@ -97,6 +97,8 @@ fun main() = runBlocking<Unit> {
     val results = resultProvider.read()
 
     val bestResult = results.maxBy { it.fscore }!!
+
+    println("Best: " + bestResult)
 
     val kernal = kernelByName(bestResult.kernel)
     val distance = distanceByName(bestResult.distance)

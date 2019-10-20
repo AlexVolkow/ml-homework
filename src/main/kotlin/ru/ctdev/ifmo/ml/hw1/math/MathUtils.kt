@@ -14,6 +14,12 @@ infix fun Double.pow(power: Int) = this.pow(power.toDouble())
 
 fun xabs(x: Double): Double = if (abs(x) < 1.0) 1.0 else 0.0
 
+fun sign(v: Double): Int = when {
+    v > 0.0 -> 1
+    v < 0.0 -> -1
+    else -> 0
+}
+
 fun harmonicMean(a: Double, b: Double): Double {
     return if ((a + b).isZero()) {
         0.0
@@ -33,6 +39,14 @@ fun Vector.std(): Double {
         std += (this[j] - avg) pow 2
     }
     return sqrt(std / size)
+}
+
+fun Vector.norm(): Double {
+    var res = 0.0
+    for (j in 0 until size) {
+        res += (this[j]) pow 2
+    }
+    return sqrt(res)
 }
 
 fun <T> List<T>.percentile(percentile: Double) = this[(percentile * size).toInt()]

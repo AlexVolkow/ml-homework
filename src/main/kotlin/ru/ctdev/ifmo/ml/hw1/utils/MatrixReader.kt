@@ -13,6 +13,7 @@ class CSVMatrixReader {
             val vector = Vector(lines[i].split(",").map { it.toDouble() }.toMutableList())
             matrix.add(vector)
         }
+        matrix.matrix.shuffle()
         return matrix
     }
 }

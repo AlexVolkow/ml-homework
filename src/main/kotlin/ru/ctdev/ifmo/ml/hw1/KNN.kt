@@ -25,18 +25,18 @@ suspend fun fixedWindow(dataset: DataSet, resultProvider: FileTrainResultProvide
 
         for (kernelName in KERNELS) {
             val kernel = kernelByName(kernelName)
-            val classificator = KnnClassificator(kernel, distance)
+            val classificator = KnnClassificator(kernel, distance, minWindow)
             val analyzer = ClassificatorAnalyzer(classificator)
 
             val separatorMin = LeaveOneOutDataSetSeparator(dataset)
 
-            val resultMin = analyzer.getScore(dataset.countClasses, separatorMin, minWindow)
+            val resultMin = analyzer.getScore(dataset.countClasses, separatorMin)
             val trainResultMin = TrainResult(kernelName, distanceName, "fixed", min, resultMin)
             resultProvider.save(trainResultMin)
             println(trainResultMin)
 
             val separatorMax = LeaveOneOutDataSetSeparator(dataset)
-            val resultMax = analyzer.getScore(dataset.countClasses, separatorMax, maxWindow)
+            val resultMax = analyzer.getScore(dataset.countClasses, separatorMax)
             val trainResultMax = TrainResult(kernelName, distanceName, "fixed", max, resultMax)
             resultProvider.save(trainResultMax)
 
@@ -55,12 +55,12 @@ suspend fun variableWindow(dataset: DataSet, resultProvider: FileTrainResultProv
             for (h in 1 until (dataset.vectors.height / 10) step (20)) {
                 println("H: $h")
                 val window = VariableWindow(h)
-                val classificator = KnnClassificator(kernel, distance)
+                val classificator = KnnClassificator(kernel, distance, window)
                 val analyzer = ClassificatorAnalyzer(classificator)
 
                 val separator = LeaveOneOutDataSetSeparator(dataset)
 
-                val result = analyzer.getScore(dataset.countClasses, separator, window)
+                val result = analyzer.getScore(dataset.countClasses, separator)
                 val trainResult = TrainResult(kernelName, distanceName, "variable", h.toDouble(), result)
                 resultProvider.save(trainResult)
                 println(trainResult)
