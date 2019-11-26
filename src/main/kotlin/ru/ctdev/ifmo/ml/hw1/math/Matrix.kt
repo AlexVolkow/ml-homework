@@ -83,15 +83,12 @@ data class Matrix(val matrix: MutableList<Vector> = mutableListOf()): MutableLis
     }
 
     fun removeRow(row: Int): Matrix {
-        val result = emptyMatrix(height - 1, width)
+        val result = mutableListOf<Vector>()
         for (i in 0 until height) {
             if (i == row) continue
-            val idx = if (i > row) i - 1 else i
-            for (j in 0 until width) {
-                result[idx][j] = this[i][j]
-            }
+            result.add(this[i].copy())
         }
-        return result
+        return Matrix(result)
     }
 
     fun splitAtColumn(idx: Int): Pair<Matrix, Matrix> {
@@ -121,3 +118,5 @@ fun emptyMatrix(height: Int = 0, width: Int = 0) =
 
 fun unitaryMatrix(height: Int, width: Int) =
     Matrix(MutableList(height) { i -> Vector(MutableList(width) { j -> if (i == j) 1.0 else 0.0 }) })
+
+fun Vector.toMatrix(): Matrix = Matrix(mutableListOf(Vector(this.toMutableList())))

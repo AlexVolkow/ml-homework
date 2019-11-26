@@ -1,7 +1,7 @@
 package ru.ctdev.ifmo.ml.hw1.classificator
 
 interface Classificator<X, Y> {
-    fun fit(dataSet: DataSet)
+    suspend fun fit(dataSet: Dataset)
 
-    fun predict(x: X): Y
+   suspend fun predict(x: X): Y
 }

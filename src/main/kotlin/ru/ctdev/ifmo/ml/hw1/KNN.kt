@@ -10,7 +10,7 @@ import ru.ctdev.ifmo.ml.hw1.utils.CSVMatrixReader
 val KERNELS = listOf("uniform", "triangular", "epanechnikov", "cosine", "quartic")
 val DISTANCES = listOf("euclidean", "chebyshev", "manhattan")
 
-suspend fun fixedWindow(dataset: DataSet, resultProvider: FileTrainResultProvider) {
+suspend fun fixedWindow(dataset: SimpleDataset, resultProvider: FileTrainResultProvider) {
     println("Fixed")
     for (distanceName in DISTANCES) {
         val distance = distanceByName(distanceName)
@@ -30,13 +30,13 @@ suspend fun fixedWindow(dataset: DataSet, resultProvider: FileTrainResultProvide
 
             val separatorMin = LeaveOneOutDataSetSeparator(dataset)
 
-            val resultMin = analyzer.getScore(dataset.countClasses, separatorMin)
+            val resultMin = fscore(analyzer.getConfMatrix(dataset.countClasses, separatorMin))
             val trainResultMin = TrainResult(kernelName, distanceName, "fixed", min, resultMin)
             resultProvider.save(trainResultMin)
             println(trainResultMin)
 
             val separatorMax = LeaveOneOutDataSetSeparator(dataset)
-            val resultMax = analyzer.getScore(dataset.countClasses, separatorMax)
+            val resultMax = fscore(analyzer.getConfMatrix(dataset.countClasses, separatorMax))
             val trainResultMax = TrainResult(kernelName, distanceName, "fixed", max, resultMax)
             resultProvider.save(trainResultMax)
 
@@ -45,7 +45,7 @@ suspend fun fixedWindow(dataset: DataSet, resultProvider: FileTrainResultProvide
     }
 }
 
-suspend fun variableWindow(dataset: DataSet, resultProvider: FileTrainResultProvider) {
+suspend fun variableWindow(dataset: SimpleDataset, resultProvider: FileTrainResultProvider) {
     println("Variable")
     for (kernelName in KERNELS) {
         val kernel = kernelByName(kernelName)
@@ -60,7 +60,7 @@ suspend fun variableWindow(dataset: DataSet, resultProvider: FileTrainResultProv
 
                 val separator = LeaveOneOutDataSetSeparator(dataset)
 
-                val result = analyzer.getScore(dataset.countClasses, separator)
+                val result = fscore(analyzer.getConfMatrix(dataset.countClasses, separator))
                 val trainResult = TrainResult(kernelName, distanceName, "variable", h.toDouble(), result)
                 resultProvider.save(trainResult)
                 println(trainResult)
@@ -81,10 +81,10 @@ fun main() = runBlocking<Unit> {
     println("------RESULT-------")
 }
 
-fun readDataSet(): DataSet {
+fun readDataSet(): SimpleDataset {
     val matrixReader = CSVMatrixReader()
     val table = matrixReader.read("dataset.csv")
-    val dataset = DataSet.fromMatrix(table, 4)
+    val dataset = SimpleDataset.fromMatrix(table, 4)
     return dataset.copy(vectors = normalize(dataset.vectors))
 }
 

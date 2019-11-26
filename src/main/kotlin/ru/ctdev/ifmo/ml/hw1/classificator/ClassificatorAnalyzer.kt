@@ -1,14 +1,14 @@
 package ru.ctdev.ifmo.ml.hw1.classificator
 
+import ru.ctdev.ifmo.ml.hw1.math.Matrix
 import ru.ctdev.ifmo.ml.hw1.math.Vector
 import ru.ctdev.ifmo.ml.hw1.math.emptyMatrix
-import ru.ctdev.ifmo.ml.hw1.math.fscore
 
 class ClassificatorAnalyzer(
     private val classificator: Classificator<Vector, Int>
 ) {
 
-    suspend fun getScore(countClasses: Int, separator: DataSetSeparator): Double {
+    suspend fun getConfMatrix(countClasses: Int, separator: DataSetSeparator): Matrix {
         val matrix = emptyMatrix(countClasses, countClasses)
         for ((train, validating) in separator.separate()) {
             classificator.fit(train)
@@ -19,6 +19,6 @@ class ClassificatorAnalyzer(
             }
         }
         //println(matrix)
-        return fscore(matrix)
+        return matrix
     }
 }

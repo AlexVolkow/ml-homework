@@ -20,8 +20,8 @@ class SVMClassificator(
     private lateinit var X: Matrix
     private lateinit var Y: Vector
 
-    override fun fit(dataSet: DataSet) {
-        X = dataSet.vectors
+    override suspend fun fit(dataSet: Dataset) {
+        X = Matrix(dataSet.toMutableList())
         Y = dataSet.classes.transpose()[0]
         val n = X.size
 
@@ -96,7 +96,7 @@ class SVMClassificator(
         }
     }
 
-    override fun predict(x: Vector): Int {
+    override suspend fun predict(x: Vector): Int {
         var res = b
         for (i in 0 until w.size) {
             if (w[i] != 0.0) {

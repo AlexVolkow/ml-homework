@@ -8,10 +8,7 @@ import org.knowm.xchart.XYChartBuilder
 import org.knowm.xchart.XYSeries.XYSeriesRenderStyle
 import org.knowm.xchart.style.Styler.LegendPosition
 import ru.ctdev.ifmo.ml.hw1.classificator.*
-import ru.ctdev.ifmo.ml.hw1.math.Distance
-import ru.ctdev.ifmo.ml.hw1.math.Kernel
-import ru.ctdev.ifmo.ml.hw1.math.distanceByName
-import ru.ctdev.ifmo.ml.hw1.math.kernelByName
+import ru.ctdev.ifmo.ml.hw1.math.*
 import ru.ctdev.ifmo.ml.hw1.train.FileTrainResultProvider
 import ru.ctdev.ifmo.ml.hw1.train.TrainResult
 
@@ -33,7 +30,7 @@ fun printGraphic(name: String, h: List<Double>, f: List<Double>) {
     SwingWrapper(chart).displayChart()
 }
 
-suspend fun getFixedWindowResults(dataset: DataSet, kernel: Kernel, distance: Distance): List<Pair<Double, Double>> {
+suspend fun getFixedWindowResults(dataset: SimpleDataset, kernel: Kernel, distance: Distance): List<Pair<Double, Double>> {
     val resultProvider = FileTrainResultProvider("fixed_graphic")
     val trainResults = resultProvider.read()
     if (trainResults.isNotEmpty()) {
@@ -54,7 +51,7 @@ suspend fun getFixedWindowResults(dataset: DataSet, kernel: Kernel, distance: Di
         val analyzer = ClassificatorAnalyzer(classificator)
         val separator = LeaveOneOutDataSetSeparator(dataset)
 
-        val fscore = analyzer.getScore(dataset.countClasses, separator)
+        val fscore = fscore(analyzer.getConfMatrix(dataset.countClasses, separator))
         resultProvider.save(TrainResult("k", "d", "w", width, fscore))
         println(width to fscore)
         results.add(width to fscore)
@@ -66,7 +63,7 @@ suspend fun getFixedWindowResults(dataset: DataSet, kernel: Kernel, distance: Di
     return results
 }
 
-suspend fun getVariableWindowResults(dataset: DataSet, kernel: Kernel, distance: Distance): List<Pair<Double, Double>> {
+suspend fun getVariableWindowResults(dataset: SimpleDataset, kernel: Kernel, distance: Distance): List<Pair<Double, Double>> {
     val resultProvider = FileTrainResultProvider("variable_graphic")
     val trainResults = resultProvider.read()
     if (trainResults.isNotEmpty()) {
@@ -81,7 +78,7 @@ suspend fun getVariableWindowResults(dataset: DataSet, kernel: Kernel, distance:
         val separator = LeaveOneOutDataSetSeparator(dataset)
 
         val width = h.toDouble()
-        val fscore = analyzer.getScore(dataset.countClasses, separator)
+        val fscore = fscore(analyzer.getConfMatrix(dataset.countClasses, separator))
         resultProvider.save(TrainResult("k", "d", "w", width, fscore))
         println(width to fscore)
         results.add(width to fscore)

@@ -8,15 +8,16 @@ import org.knowm.xchart.style.Styler
 import org.knowm.xchart.style.markers.Circle
 import ru.ctdev.ifmo.ml.hw1.classificator.*
 import ru.ctdev.ifmo.ml.hw1.math.Vector
+import ru.ctdev.ifmo.ml.hw1.math.fscore
 import ru.ctdev.ifmo.ml.hw1.utils.CSVMatrixReader
 import java.awt.Color
 
 typealias KernelParams = Triple<String, ParameterizedKernel, Double>
 
-fun readDataSet(name: String): DataSet {
+fun readDataSet(name: String): SimpleDataset {
     val matrixReader = CSVMatrixReader()
     val table = matrixReader.read(name)
-    return DataSet.fromMatrix(table, 2)
+    return SimpleDataset.fromMatrix(table, 2)
 }
 
 data class TrainParams(
@@ -31,7 +32,7 @@ data class TrainParams(
     }
 }
 
-fun printAreas(dt: DataSet, classificator: Classificator<Vector, Int>) {
+suspend fun printAreas(dt: SimpleDataset, classificator: Classificator<Vector, Int>) {
     val chart = XYChartBuilder()
         .width(800)
         .height(700)
@@ -119,7 +120,7 @@ fun printAreas(dt: DataSet, classificator: Classificator<Vector, Int>) {
     SwingWrapper(chart).displayChart()
 }
 
-fun printBestForKernel(kernelName: String, dt: DataSet, trains: List<TrainParams>) {
+suspend fun printBestForKernel(kernelName: String, dt: SimpleDataset, trains: List<TrainParams>) {
     val bestParams = trains.filter { it.kenelName == kernelName }.maxBy { it.fscore }!!
     println(bestParams)
 
@@ -155,7 +156,7 @@ private suspend fun testDataSet(filename: String, params: List<KernelParams>) {
         val analyzer = ClassificatorAnalyzer(classificator)
         val separator = KFoldDataSetSeparator(dt)
 
-        val score = analyzer.getScore(dt.countClasses, separator)
+        val score = fscore(analyzer.getConfMatrix(dt.countClasses, separator))
         trainLog.add(TrainParams(name, c, score, kernel, classificator))
 
         println("$name: $score")
